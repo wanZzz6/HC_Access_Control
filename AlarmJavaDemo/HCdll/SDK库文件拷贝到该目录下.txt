@@ -1,0 +1,27 @@
+【Demo内容说明】
+-------------------------------------
+1. 该Demo为报警布防接收报警信息的Demo示例，现有报警信息类型：
+COMM_ALARM_V30
+COMM_ALARM_RULE
+COMM_UPLOAD_PLATE_RESULT
+COMM_ITS_PLATE_RESULT
+COMM_ALARM_PDC
+COMM_ITS_PARK_VEHICLE
+COMM_ALARM_TFS(20170222)
+COMM_UPLOAD_FACESNAP_RESULT
+COMM_SNAP_MATCH_ALARM
+COMM_ALARM_ACS
+COMM_ID_INFO_ALARM
+
+
+【注意事项】
+------------------------------------
+1. 请到海康威视官网下载最新版本设备网络SDK：http://www.hikvision.com/Cn/download_more_401.html
+
+2. 请修改程序代码，其中HCNetSDK.java文件自己指定loadlibrary加载库的路径，【库文件】里的HCNetSDK.dll、HCCore.dll、HCNetSDKCom文件夹等文件均拷贝到lib文件夹下。
+
+   HCNetSDKCom文件夹（包含里面的功能组件dll库文件）需要和HCNetSDK.dll、HCCore.dll一起加载，放在同一个目录下，且HCNetSDKCom文件夹名不能修改。
+
+3. 如果自行开发软件不能正常实现相应功能，而且程序没有指定加载的dll库路径，请在程序运行的情况下尝试删除HCNetSDK.dll。如果可以删除，说明程序可能调用到系统盘Windows->System32目录下的dll文件，建议删除或者更新该目录下的相关dll文件；如果不能删除，dll文件右键选择属性确认SDK库版本。
+
+4. 如按上述步骤操作后还是不能实现相应功能，请根据NET_DVR_GetLastError返回的错误号判断原因。
