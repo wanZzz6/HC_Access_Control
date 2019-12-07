@@ -221,11 +221,12 @@ public class UserTools {
 	}
 
 	public static void main(String[] args) {
-		UserTools hcTool = new UserTools("192.168.1.1", "admin", "1213456");
+		// Demo
+		UserTools hcTool = new UserTools("192.168.1.1", "admin", "123456");
 		hcTool.initTools();
 
 		hcTool.setupAlarmChan();
-		// sleep
+		// 监听 10 s
 		try {
 			hcTool.openTheDoor(1);
 			Thread.currentThread();
