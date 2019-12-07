@@ -17,5 +17,7 @@
 	<classpathentry kind="lib" path="lib/swing-app-framework/appframework-1.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/swing-layout-1.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/swing-layout/swing-layout-1.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.paho.client.mqttv3-1.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/gson-2.2.4.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

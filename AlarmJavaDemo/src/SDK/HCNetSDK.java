@@ -12,11 +12,11 @@ import com.sun.jna.win32.StdCallLibrary;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.ShortByReference;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 //SDK接口说明,HCNetSDK.dll
 public interface HCNetSDK extends StdCallLibrary {
-
 
 	HCNetSDK INSTANCE = (HCNetSDK) Native.loadLibrary("D:\\HCdll\\HCNetSDK.dll", HCNetSDK.class);
 	/*** 宏定义 ***/
@@ -527,6 +527,7 @@ public interface HCNetSDK extends StdCallLibrary {
 	public static final int COMM_ALARM_ACS = 0x5002; // 门禁主机报警信息
 	public static final int COMM_ID_INFO_ALARM = 0x5200; // 门禁身份证刷卡信息
 	public static final int COMM_VCA_ALARM = 0x4993; // 智能检测通用报警
+	public static final int COMM_PASSNUM_INFO_ALARM = 0x5201; // 门禁通行人数信息
 	public static final int COMM_ISAPI_ALARM = 0x6009;// ISAPI协议报警信息
 	public static final int COMM_ALARM_TPS_STATISTICS = 0x3082; // TPS统计过车数据上传
 	/************* 操作异常类型(消息方式, 回调方式(保留)) ****************/
@@ -778,6 +779,19 @@ public interface HCNetSDK extends StdCallLibrary {
 		// 存储文件名使用
 		public String toStringTitle() {
 			return String.format("Time%02d%02d%02d%02d%02d%02d", dwYear, dwMonth, dwDay, dwHour, dwMinute, dwSecond);
+		}
+
+		// 转为时间戳
+		public long toMillis() {
+			Calendar calendar = Calendar.getInstance();
+			calendar.set(Calendar.YEAR, dwYear);
+			calendar.set(Calendar.MONTH, dwMonth - 1);
+			calendar.set(Calendar.DATE, dwDay);
+			calendar.set(Calendar.HOUR, dwHour);
+			calendar.set(Calendar.MINUTE, dwMinute);
+			calendar.set(Calendar.SECOND, dwSecond);
+			long st = calendar.getTimeInMillis();
+			return st;
 		}
 	}
 
@@ -3130,6 +3144,18 @@ public interface HCNetSDK extends StdCallLibrary {
 		public byte byRes;
 		public short wMilliSec;
 		public byte[] byRes1 = new byte[2];
+
+		public long toMillis() {
+			Calendar calendar = Calendar.getInstance();
+			calendar.set(Calendar.YEAR, wYear);
+			calendar.set(Calendar.MONTH, byMonth - 1);
+			calendar.set(Calendar.DATE, byDay);
+			calendar.set(Calendar.HOUR, byHour);
+			calendar.set(Calendar.MINUTE, byMinute);
+			calendar.set(Calendar.SECOND, bySecond);
+			long st = calendar.getTimeInMillis();
+			return st;
+		}
 	}
 
 	public static class NET_ITS_PICTURE_INFO extends Structure {
@@ -3360,12 +3386,12 @@ public interface HCNetSDK extends StdCallLibrary {
 //门禁主机事件信息
 	public static class NET_DVR_ACS_EVENT_INFO extends Structure {
 		public int dwSize;
-		public byte[] byCardNo = new byte[32];
-		public byte byCardType;
-		public byte byWhiteListNo;
-		public byte byReportChannel;
-		public byte byCardReaderKind;
-		public int dwCardReaderNo;
+		public byte[] byCardNo = new byte[32]; // 卡号
+		public byte byCardType; // 卡类型：1- 普通卡，2- 残疾人卡，3- 黑名单卡，4- 巡更卡，5- 胁迫卡，6- 超级卡，7- 来宾卡，8- 解除卡，为 0 表示无效
+		public byte byWhiteListNo; // 白名单单号，取值范围：1~8，0 表示无效
+		public byte byReportChannel; // 报告上传通道：1- 布防上传，2- 中心组 1 上传，3- 中心组 2 上传，0 表示无效
+		public byte byCardReaderKind; // 读卡器类型：0- 无效，1- IC 读卡器，2- 身份证读卡器，3- 二维码读卡器，4- 指纹头
+		public int dwCardReaderNo; // 读卡器编号，为 0 表示无效
 		public int dwDoorNo;
 		public int dwVerifyNo;
 		public int dwAlarmInNo;
@@ -3376,10 +3402,11 @@ public interface HCNetSDK extends StdCallLibrary {
 		public short wAccessChannel;
 		public byte byDeviceNo;
 		public byte byDistractControlNo;
-		public int dwEmployeeNo;
+		public int dwEmployeeNo; // 工号，为 0 无效
 		public short wLocalControllerID;
 		public byte byInternetAccess;
-		public byte byType;
+		public byte byType; // 防区类型，0-即时防区，1-24 小时防区，2-延时防区，3-内部防区，4-钥匙防区，5-火警防区，6-周界防区，7-24 小时无声防区，8-24
+							// 小时辅助防区，9-24 小时震动防区，10-门禁紧急开门防区，11-门禁紧急关门防区，0xff-无
 		public byte[] byRes = new byte[20];
 	}
 
