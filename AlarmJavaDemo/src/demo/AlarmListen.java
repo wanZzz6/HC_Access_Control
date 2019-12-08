@@ -1,9 +1,10 @@
-import SDK.UserTools;
+package demo;
+import sdk.HCTools;
 
 public class AlarmListen {
 	// 布防、监听事件
 	public static void main(String[] args) {
-		UserTools hcTool = new UserTools("192.168.1.1", "admin", "123456");
+		HCTools hcTool = new HCTools("192.168.1.1", "admin", "123456");
 		hcTool.initTools();
 
 		hcTool.setupAlarmChan();

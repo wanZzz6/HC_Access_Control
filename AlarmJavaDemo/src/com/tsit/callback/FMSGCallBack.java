@@ -1,5 +1,7 @@
-package SDK;
+package com.tsit.callback;
 import com.sun.jna.Pointer;
+
+import sdk.HCNetSDK;
 
 public class FMSGCallBack implements HCNetSDK.FMSGCallBack {
 		// 报警信息回调函数

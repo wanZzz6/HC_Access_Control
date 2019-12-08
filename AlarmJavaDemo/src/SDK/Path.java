@@ -1,4 +1,4 @@
-package SDK;
+package sdk;
 
 public class Path {
 	public static String PATH = "";

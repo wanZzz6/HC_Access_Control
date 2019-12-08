@@ -1,14 +1,14 @@
-package SDK;
-
-import javax.swing.JOptionPane;
+package sdk;
 
 import com.sun.jna.Pointer;
+import com.tsit.callback.FMSGCallBack;
+import com.tsit.callback.FMSGCallBack_V31;
 
-public class UserTools {
+public class HCTools {
 
 	private HCNetSDK hCNetSDK = null;
 	private String ipAddress;
-	private String userName = "admin";
+	private String userName;
 	private short port = 8000;
 
 	private String passwd;
@@ -19,13 +19,21 @@ public class UserTools {
 	private FMSGCallBack fMSFCallBack = null;// 报警回调函数实现
 	private FMSGCallBack_V31 fMSFCallBack_V31 = null;// 报警回调函数实现
 
-	public UserTools(String ipAddress, String userName, String passwd) {
+	public void setfMSFCallBack(FMSGCallBack fMSFCallBack) {
+		this.fMSFCallBack = fMSFCallBack;
+	}
+
+	public void setfMSFCallBack_V31(FMSGCallBack_V31 fMSFCallBack_V31) {
+		this.fMSFCallBack_V31 = fMSFCallBack_V31;
+	}
+
+	public HCTools(String ipAddress, String userName, String passwd) {
 		this.ipAddress = ipAddress;
 		this.userName = userName;
 		this.passwd = passwd;
 	}
 
-	public UserTools(String ipAddress, String userName, String passwd, short port) {
+	public HCTools(String ipAddress, String userName, String passwd, short port) {
 		this.ipAddress = ipAddress;
 		this.userName = userName;
 		this.passwd = passwd;
@@ -55,8 +63,9 @@ public class UserTools {
 //			// 断线重连
 //			hCNetSDK.NET_DVR_SetConnectTime(2000, 1);
 //			hCNetSDK.NET_DVR_SetReconnect(10000, true);
+			userLogin(this.ipAddress, this.userName, this.passwd, this.port);
 		}
-		userLogin(this.ipAddress, this.userName, this.passwd, this.port);
+		
 		System.out.println("============= 华丽的分割线 ==============");
 	}
 
@@ -109,7 +118,7 @@ public class UserTools {
 		lUserID = hCNetSDK.NET_DVR_Login_V40(m_strLoginInfo, m_strDeviceInfo);
 		// -1: fail 0: success
 		if (lUserID == -1) {
-			System.out.println("注册失败，错误号:");
+			System.out.println("注册失败，错误号:" + getErrorCode());
 			return false;
 		} else {
 			System.out.println("注册成功");
@@ -182,9 +191,9 @@ public class UserTools {
 			// 报警布防
 			lAlarmHandle = hCNetSDK.NET_DVR_SetupAlarmChan_V41(lUserID, m_strAlarmInfo);
 			if (lAlarmHandle == -1) {
-				System.out.println("布防失败，错误号:" + getErrorCode());
+				System.out.println(ipAddress + " 布防失败，错误号:" + getErrorCode());
 			} else {
-				System.out.println("布防成功");
+				System.out.println(ipAddress + " 布防成功");
 			}
 		} else {
 			System.out.println("已经布防");
@@ -218,11 +227,12 @@ public class UserTools {
 		CloseAlarmChan();
 		LouOut();
 		hCNetSDK.NET_DVR_Cleanup();
+		System.out.println("已释放资源");
 	}
 
 	public static void main(String[] args) {
 		// Demo
-		UserTools hcTool = new UserTools("192.168.1.1", "admin", "123456");
+		HCTools hcTool = new HCTools("192.168.1.1", "admin", "123456");
 		hcTool.initTools();
 
 		hcTool.setupAlarmChan();
