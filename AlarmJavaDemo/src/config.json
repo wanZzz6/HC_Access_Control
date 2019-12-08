@@ -1,0 +1,21 @@
+[
+	{
+		"area": "三层门禁",
+		"device": [
+			{
+				"alias": "第二会议室",
+				"ipAddress": "192.168.1.1",
+				"userName": "",
+				"passwd": "",
+				"name": "门1"
+			},
+			{
+				"alias": "总经理办公室",
+				"ipAddress": "192.168.1.2",
+				"userName": "",
+				"passwd": "",
+				"name": "门2"
+			},
+		]
+	}
+]
