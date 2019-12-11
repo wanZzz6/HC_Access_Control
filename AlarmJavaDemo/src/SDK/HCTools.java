@@ -80,15 +80,13 @@ public class HCTools {
 		return lUserID;
 	}
 
-//  获取 SDK  的版本号和 build  信息
+	/*
+	 * SDK 的版本号和 build 信息。2 个高字节表示版本号 ：25~32 位表示主版本号，17~24 位表示次
+	 版本号；2 个低字节表示 build 信息。如 0x03000101：表示版本号为 3.0，build 号是 0101。
+	 */
 	public String getSDKBuildVersion() {
 		String version = "0x" + Integer.toHexString(hCNetSDK.NET_DVR_GetSDKBuildVersion());
 		return version;
-	}
-
-	// 获取设备的配置信息
-	public void 获取设备的配置信息() {
-
 	}
 
 	public int getErrorCode() {

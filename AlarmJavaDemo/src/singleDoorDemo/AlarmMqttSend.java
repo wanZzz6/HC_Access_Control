@@ -1,4 +1,4 @@
-package demo;
+package singleDoorDemo;
 
 import com.tsit.callback.FMSGCallBack_V31;
 import com.tsit.mqtt.MyMqttClient;

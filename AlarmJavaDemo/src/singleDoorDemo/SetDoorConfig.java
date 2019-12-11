@@ -1,4 +1,4 @@
-package demo;
+package singleDoorDemo;
 
 import sdk.HCNetSDK;
 import sdk.HCTools;
