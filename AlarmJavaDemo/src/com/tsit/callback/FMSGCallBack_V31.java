@@ -7,13 +7,14 @@ import com.tsit.mqtt.MyMqttClient;
 
 import sdk.HCNetSDK;
 
+
 //文档6.5.1
 public class FMSGCallBack_V31 implements HCNetSDK.FMSGCallBack_V31 {
 
 	// 门别名
-	public String doorName="";
+	public String doorName = "";
 	// 对应的thingsboard物联网平台设备名
-	public String tbDeviceName="";
+	public String tbDeviceName = "";
 
 	private static final String GATEWAY_TELEMETRY_TOPIC = "v1/gateway/telemetry";
 	// DCL单例模式
@@ -48,11 +49,13 @@ public class FMSGCallBack_V31 implements HCNetSDK.FMSGCallBack_V31 {
 	}
 
 	// 报警信息回调函数
-//		lCommand  上传的消息类型，详见表 6.
+//		lCommand  上传的消息类型，详见表 6.6
 //		pAlarmer  报警设备信息，详见 NET_DVR_ALARMER
-//		pAlarmInfo 报警信息，详见表 6.
+//		pAlarmInfo 报警信息，详见表 6.7
 //		dwBufLen  报警信息缓存大小
 //		pUser    用户数据
+//	第一个参数（lCommand）和第三个参数（pAlarmInfo）是密切关联的，其
+//	关系如表 6.7 .所示。
 	public boolean invoke(int lCommand, HCNetSDK.NET_DVR_ALARMER pAlarmer, Pointer pAlarmInfo, int dwBufLen,
 			Pointer pUser) {
 

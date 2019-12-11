@@ -26,6 +26,10 @@ public interface HCNetSDK extends StdCallLibrary {
 	public static final int NAME_LEN = 32; // 用户名长度
 	public static final int PASSWD_LEN = 16; // 密码长度
 	public static final int SERIALNO_LEN = 48; // 序列号长度
+	public static final int DOOR_NAME_LEN = 32; // 门禁门名称长度
+	public static final int STRESS_PASSWORD_LEN = 8; // 胁迫密码长度
+	public static final int SUPER_PASSWORD_LEN = 8; // 超级密码长度
+	public static final int UNLOCK_PASSWORD_LEN = 8; // 解除码，解锁密码长度
 	public static final int MACADDR_LEN = 6; // mac地址长度
 	public static final int MAX_ETHERNET = 2; // 设备可配以太网络
 	public static final int PATHNAME_LEN = 128; // 路径长度
@@ -746,8 +750,14 @@ public interface HCNetSDK extends StdCallLibrary {
 	public static final int NET_DVR_GET_IVMS_BEHAVIORCFG = 177; // 获取智能分析仪行为规则参数
 	public static final int NET_DVR_GET_TRAVERSE_PLANE_DETECTION = 3360; // 获取越界侦测配置
 
+	public static final int NET_DVR_GET_DOOR_CFG = 2108; // 获取门参数
+	public static final int NET_DVR_SET_DOOR_CFG = 2109; // 设置门参数
 	public static final int NET_DVR_GET_CARD_CFG = 2116; // 获取卡参数
 	public static final int NET_DVR_SET_CARD_CFG = 2117; // 设置卡参数
+	public static final int NET_DVR_GET_DOOR_STATUS_PLAN = 2110; // 获取门状态计划参数
+	public static final int NET_DVR_SET_DOOR_STATUS_PLAN = 2111; // 设置门状态计划参数
+	public static final int NET_DVR_GET_EVENT_CARD_LINKAGE_CFG_V50 = 2181; // 获取事件卡号联动配置参数(V50)
+	public static final int NET_DVR_SET_EVENT_CARD_LINKAGE_CFG_V50 = 2182; // 设置事件卡号联动配置参数(V50)
 
 	/********************** 设备类型 end ***********************/
 
@@ -4404,6 +4414,15 @@ public interface HCNetSDK extends StdCallLibrary {
 	boolean NET_DVR_GetDeviceConfig(int lUserID, int dwCommand, int dwCount, Pointer lpInBuffer, int dwInBufferSize,
 			Pointer lpStatusList, Pointer lpOutBuffer, int dwOutBufferSize);
 
+	/**
+	 * @param lUserID         NET_DVR_Login_V40等登录接口的返回值
+	 * @param dwCommand       设备配置命令 ，详见“Remarks”说明
+	 * @param lChannel        通道号，不同的命令对应不同的取值，如果该参数无效则置为0xFFFFFFFF即可， 详见“Remarks”说明
+	 * @param lpOutBuffer     接收数据的缓冲指针
+	 * @param dwOutBufferSize 接收数据的缓冲长度(以字节为单位)，不能为0
+	 * @param lpBytesReturned 实际收到的数据长度指针，不能为NULL
+	 * @return
+	 */
 	boolean NET_DVR_GetDVRConfig(int lUserID, int dwCommand, int lChannel, Pointer lpOutBuffer, int dwOutBufferSize,
 			IntByReference lpBytesReturned);
 
@@ -4434,6 +4453,45 @@ public interface HCNetSDK extends StdCallLibrary {
 	boolean NET_DVR_GetAlarmOut(int lUserID, NET_DVR_ALARMOUTSTATUS lpAlarmOutState);
 
 	boolean NET_DVR_SetAlarmOut(int lUserID, int lAlarmOutPort, int lAlarmOutStatic);
+
+// 门（禁）参数配置
+	public static class NET_DVR_DOOR_CFG extends Structure {
+		public int dwSize; // 结构体大小
+		public byte[] byDoorName = new byte[DOOR_NAME_LEN]; // 门名称
+		public byte byMagneticType; // 门磁类型：0- 常闭，1- 常开
+		public byte byOpenButtonType; // 开门按钮类型：0- 常闭，1- 常开
+		public byte byOpenDuration; // 开门持续时间（楼层继电器动作时间），取值范围：1~255s
+		public byte byDisabledOpenDuration; // 残疾人卡开门持续时间，取值范围：1~255s
+		public byte byMagneticAlarmTimeout;// 门磁检测超时报警时间，取值范围：0~255s，0表示不报警
+		public byte byEnableDoorLock; // 是否启用闭门回锁：0- 否，1- 是
+		public byte byEnableLeaderCard; // 是否启用首卡常开功能：0- 否，1- 是
+		public byte byLeaderCardMode; // 首卡模式，0-不启用首卡功能，1-首卡常开模式，2-首卡授权模式（使用了此字段，则byEnableLeaderCard无效）
+		public int dwLeaderCardOpenDuration; // 首卡常开持续时间，取值范围：1~1440，单位：min（分钟）
+		public byte[] byStressPassword = new byte[STRESS_PASSWORD_LEN]; // 胁迫密码
+		public byte[] bySuperPassword = new byte[SUPER_PASSWORD_LEN]; // 超级密码
+		public byte[] byUnlockPassword = new byte[UNLOCK_PASSWORD_LEN]; // 解除码，解锁密码
+		public byte byUseLocalController; // 只读，是否连接在就地控制器上，0-否，1-是
+		public byte byRes1; // 保留，置为0
+		public short wLocalControllerID; // 只读，就地控制器序号，byUseLocalController=1时有效，1-64,0代表未注册
+		public short wLocalControllerDoorNumber; // 只读，就地控制器的门编号，byUseLocalController=1时有效，1-4,0代表未注册
+		public short wLocalControllerStatus; // 只读，byUseLocalController=1时有效，就地控制器在线状态：0-离线，1-网络在线，2-环路1上的RS485串口1，3-环路1上的RS485串口2，4-环路2上的RS485串口1，5-环路2上的RS485串口2，6-环路3上的RS485串口1，7-环路3上的RS485串口2，8-环路4上的RS485串口1，9-环路4上的RS485串口2（只读）
+		public byte byLockInputCheck; // 是否启用门锁输入检测(1字节，0不启用，1启用，默认不启用)
+		public byte byLockInputType; // 门锁输入类型(1字节，0常闭，1常开，默认常闭)
+		public byte byDoorTerminalMode; // 门相关端子工作模式(1字节，0防剪防短，1普通，默认防剪防短)
+		public byte byOpenButton; // 是否启用开门按钮(0是，1否，默认是)
+		public byte byLadderControlDelayTime; // 梯控访客延迟时间，取值范围：1~255，单位：分钟
+		public byte[] byRes2 = new byte[43]; // 保留，置为0
+
+		@Override
+		protected List getFieldOrder() {
+			return Arrays.asList(new String[] { "dwSize", "byDoorName", "byMagneticType", "byOpenButtonType",
+					"byOpenDuration", "byDisabledOpenDuration", "byMagneticAlarmTimeout", "byEnableDoorLock",
+					"byEnableLeaderCard", "byLeaderCardMode", "dwLeaderCardOpenDuration", "byStressPassword",
+					"bySuperPassword", "byUnlockPassword", "byUseLocalController", "byRes1", "wLocalControllerID",
+					"wLocalControllerDoorNumber", "wLocalControllerStatus", "byLockInputCheck", "byLockInputType",
+					"byDoorTerminalMode", "byOpenButton", "byLadderControlDelayTime", "byRes2" });
+		}
+	}
 
 //视频参数调节
 	boolean NET_DVR_ClientSetVideoEffect(int lRealHandle, int dwBrightValue, int dwContrastValue, int dwSaturationValue,

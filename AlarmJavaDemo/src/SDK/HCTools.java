@@ -1,14 +1,16 @@
 package sdk;
 
 import com.sun.jna.Pointer;
+import com.sun.jna.ptr.IntByReference;
 import com.tsit.callback.FMSGCallBack;
 import com.tsit.callback.FMSGCallBack_V31;
 
 public class HCTools {
 
-	private HCNetSDK hCNetSDK = null;
+	public HCNetSDK hCNetSDK = null;
 	private String ipAddress;
 	private String userName;
+
 	private short port = 8000;
 
 	private String passwd;
@@ -18,6 +20,8 @@ public class HCTools {
 
 	private FMSGCallBack fMSFCallBack = null;// 报警回调函数实现
 	private FMSGCallBack_V31 fMSFCallBack_V31 = null;// 报警回调函数实现
+
+	public HCNetSDK.NET_DVR_DOOR_CFG struDoorCfg; // 门参数结构体
 
 	public void setfMSFCallBack(FMSGCallBack fMSFCallBack) {
 		this.fMSFCallBack = fMSFCallBack;
@@ -44,16 +48,60 @@ public class HCTools {
 		return ipAddress;
 	}
 
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
+	}
+
 	public String getUserName() {
 		return userName;
 	}
 
-//	public String getPasswd() {
-//		return passwd;
-//	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 
+	public short getPort() {
+		return port;
+	}
+
+	public void setPort(short port) {
+		this.port = port;
+	}
+
+	public String getPasswd() {
+		return passwd;
+	}
+
+	public void setPasswd(String passwd) {
+		this.passwd = passwd;
+	}
+
+	public int getUserID() {
+		return lUserID;
+	}
+
+//  获取 SDK  的版本号和 build  信息
+	public String getSDKBuildVersion() {
+		String version = "0x" + Integer.toHexString(hCNetSDK.NET_DVR_GetSDKBuildVersion());
+		return version;
+	}
+
+	// 获取设备的配置信息
+	public void 获取设备的配置信息() {
+
+	}
+
+	public int getErrorCode() {
+		// 获取错误码
+		if (hCNetSDK == null) {
+			System.err.println("请先初始化");
+			return -999;
+		}
+		return hCNetSDK.NET_DVR_GetLastError();
+	}
+
+	// 初始化+注册
 	public void initTools() {
-		// 初始化+注册
 		hCNetSDK = HCNetSDK.INSTANCE;
 		boolean initSuc = hCNetSDK.NET_DVR_Init();
 		if (initSuc != true) {
@@ -65,21 +113,8 @@ public class HCTools {
 //			hCNetSDK.NET_DVR_SetReconnect(10000, true);
 			userLogin(this.ipAddress, this.userName, this.passwd, this.port);
 		}
-		
+
 		System.out.println("============= 华丽的分割线 ==============");
-	}
-
-	public int getErrorCode() {
-		// 获取错误码
-		if (hCNetSDK == null) {
-			System.out.println("请先初始化");
-			return -999;
-		}
-		return hCNetSDK.NET_DVR_GetLastError();
-	}
-
-	public int getUserID() {
-		return lUserID;
 	}
 
 	// 默认端口8000
@@ -118,12 +153,90 @@ public class HCTools {
 		lUserID = hCNetSDK.NET_DVR_Login_V40(m_strLoginInfo, m_strDeviceInfo);
 		// -1: fail 0: success
 		if (lUserID == -1) {
-			System.out.println("注册失败，错误号:" + getErrorCode());
+			System.err.println("注册失败，错误号:" + getErrorCode());
 			return false;
 		} else {
 			System.out.println("注册成功");
 			return true;
 		}
+	}
+
+	// 获取门参数
+	public HCNetSDK.NET_DVR_DOOR_CFG getDoorConfig() {
+		if (lUserID == -1) {
+			System.err.println("请先注册");
+		}
+		if (this.struDoorCfg == null) {
+			this.struDoorCfg = new HCNetSDK.NET_DVR_DOOR_CFG();
+		}
+
+		struDoorCfg.write();
+		// 获取指针
+		Pointer pDoorCfg = struDoorCfg.getPointer();
+		// 获取门参数：2108
+		boolean bRet = hCNetSDK.NET_DVR_GetDVRConfig(lUserID, HCNetSDK.NET_DVR_GET_DOOR_CFG, 1, pDoorCfg, struDoorCfg.size(),
+				new IntByReference());
+
+		if (!bRet) {
+			System.err.println("获取门参数失败，错误码：" + getErrorCode());
+		}
+		struDoorCfg.read();
+		return struDoorCfg;
+	}
+
+	// 输出门参数
+	public void printDoorConfig() {
+		if (lUserID == -1) {
+			System.err.println("请先注册");
+			return;
+		}
+		if (struDoorCfg == null) {
+			struDoorCfg = new HCNetSDK.NET_DVR_DOOR_CFG();
+		}
+
+		struDoorCfg.write();
+		// 获取指针
+		Pointer pDoorCfg = struDoorCfg.getPointer();
+		// 获取门参数：2108
+		boolean bRet = hCNetSDK.NET_DVR_GetDVRConfig(lUserID, HCNetSDK.NET_DVR_GET_DOOR_CFG, 1, pDoorCfg, struDoorCfg.size(),
+				new IntByReference());
+
+		if (bRet) {
+			// 读数据
+			struDoorCfg.read();
+			System.out.println("获取门参数：");
+			System.out.println("门名称:" + new String(struDoorCfg.byDoorName));
+			System.out.print("门磁类型： " + (struDoorCfg.byMagneticType > 0 ? "常开" : "常闭"));
+			System.out.println("开门按钮类型：" + (struDoorCfg.byOpenButtonType > 0 ? "常开" : "常闭"));
+			System.out.println("开门持续时间： " + struDoorCfg.byOpenDuration);
+			System.out.println("是否启用闭门回锁： " + (struDoorCfg.byEnableDoorLock > 0 ? "是" : "否"));
+			System.out.println("是否启用首卡常开功能： " + (struDoorCfg.byEnableLeaderCard > 0 ? "是" : "否"));
+			System.out
+					.println("首卡模式：" + (new String[] { "不启用首卡功能", "首卡常开模式", "首卡授权模式" })[struDoorCfg.byLeaderCardMode]);
+			System.out.println("胁迫密码：" + new String(struDoorCfg.byStressPassword));
+			System.out.println("超级密码：" + new String(struDoorCfg.bySuperPassword));
+			System.out.println("解锁密码：" + new String(struDoorCfg.bySuperPassword));
+			System.out.println("是否启用门锁输入检测：" + (struDoorCfg.byLockInputCheck > 0 ? "启用" : "不启用"));
+			System.out.println("门锁输入类型：" + (struDoorCfg.byLockInputType > 0 ? "常开" : "常闭"));
+			System.out.println("是否启用开门按钮：" + (struDoorCfg.byOpenButton > 0 ? "否" : "是"));
+			System.out.println("梯控访客延迟时间：" + struDoorCfg.byLadderControlDelayTime + "分钟");
+		} else {
+			System.err.println("获取门参数失败，错误码：" + getErrorCode());
+		}
+	}
+	
+	// 设置门参数，NET_DVR_DOOR_CFG 参数设置完记得 write()
+	public void setDoorConfig(HCNetSDK.NET_DVR_DOOR_CFG m_struDoorCfg) {
+		boolean bRet = false;
+		bRet = hCNetSDK.NET_DVR_SetDVRConfig(lUserID, HCNetSDK.NET_DVR_SET_DOOR_CFG, 1,
+				m_struDoorCfg.getPointer(), m_struDoorCfg.size());
+
+		if (bRet) {
+			System.out.println("修改成功");
+		} else {
+			System.err.println("修改参数失败，错误码：" + getErrorCode());
+		}
+
 	}
 
 	// 改变门禁状态
@@ -139,8 +252,11 @@ public class HCTools {
 			case 3:
 				result = closeTheDoorForrever(doorIndex);
 				break;
+			case 2:
+				result = openTheDoorForrever(doorIndex);
+				break;
 			default:
-				System.out.println("未实现此功能");
+				System.err.println("未实现此功能");
 			}
 		} else {
 			System.out.println("请先注册！");
@@ -149,7 +265,7 @@ public class HCTools {
 		if (result) {
 			System.out.println("执行成功！");
 		} else {
-			System.out.println("执行失败！");
+			System.err.println("执行失败！");
 		}
 		return result;
 	}
@@ -162,6 +278,11 @@ public class HCTools {
 	public boolean closeTheDoorForrever(int doorIndex) {
 		System.out.println("控制门常闭");
 		return hCNetSDK.NET_DVR_ControlGateway(lUserID, doorIndex, 3);
+	}
+
+	public boolean openTheDoorForrever(int doorIndex) {
+		System.out.println("控制门常开");
+		return hCNetSDK.NET_DVR_ControlGateway(lUserID, doorIndex, 2);
 	}
 
 	// 设置布防，二级、实时布防
@@ -191,7 +312,7 @@ public class HCTools {
 			// 报警布防
 			lAlarmHandle = hCNetSDK.NET_DVR_SetupAlarmChan_V41(lUserID, m_strAlarmInfo);
 			if (lAlarmHandle == -1) {
-				System.out.println(ipAddress + " 布防失败，错误号:" + getErrorCode());
+				System.err.println(ipAddress + " 布防失败，错误号:" + getErrorCode());
 			} else {
 				System.out.println(ipAddress + " 布防成功");
 			}
@@ -208,7 +329,7 @@ public class HCTools {
 				System.out.println("撤防成功");
 				lAlarmHandle = -1;
 			} else {
-				System.out.println("撤防失败");
+				System.err.println("撤防失败");
 			}
 		}
 	}

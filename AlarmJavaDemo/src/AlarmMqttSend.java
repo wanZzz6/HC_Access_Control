@@ -3,7 +3,6 @@ import java.util.ArrayList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.sun.tools.javac.code.Attribute.Array;
 import com.tsit.callback.FMSGCallBack_V31;
 import com.tsit.mqtt.MyMqttClient;
 import com.tsit.utils.JsonUtils;
@@ -45,7 +44,9 @@ public class AlarmMqttSend {
 				JsonObject doorInfoObject = doorInfoElement.getAsJsonObject();
 
 				FMSGCallBack_V31 cb = new FMSGCallBack_V31(doorInfoObject.get("name").getAsString().toString(), area);
-				HCTools hctools = new HCTools(doorInfoObject.get("ipAddress").getAsString().toString(), "admin", "admin777");
+				HCTools hctools = new HCTools(doorInfoObject.get("ipAddress").getAsString().toString(),
+						doorInfoObject.get("userName").getAsString().toString(),
+						doorInfoObject.get("passwd").getAsString().toString());
 
 				// 初始化
 				hctools.initTools();

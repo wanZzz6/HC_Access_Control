@@ -5,17 +5,17 @@
 			{
 				"alias": "第二会议室",
 				"ipAddress": "192.168.1.1",
-				"userName": "",
-				"passwd": "",
+				"userName": "admin",
+				"passwd": "admin",
 				"name": "门1"
 			},
 			{
 				"alias": "总经理办公室",
 				"ipAddress": "192.168.1.2",
-				"userName": "",
-				"passwd": "",
+				"userName": "admin",
+				"passwd": "admin",
 				"name": "门2"
-			},
+			}
 		]
 	}
 ]
