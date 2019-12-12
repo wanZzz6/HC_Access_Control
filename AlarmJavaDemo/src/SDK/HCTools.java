@@ -114,8 +114,8 @@ public class HCTools {
 		return version;
 	}
 
+	// 获取错误码
 	public int getErrorCode() {
-		// 获取错误码
 		if (hCNetSDK == null) {
 			System.err.println("请先初始化");
 			return -999;
@@ -123,12 +123,22 @@ public class HCTools {
 		return hCNetSDK.NET_DVR_GetLastError();
 	}
 
+	// 获取错误信息
+	public String getErrorMsg() {
+		return hCNetSDK.NET_DVR_GetErrorMsg(new IntByReference(getErrorCode()));
+	}
+	
+	public void printErrorInfo() {
+		System.err.println("错误码：" + getErrorCode() + "，错误信息：" + getErrorMsg());
+	}
+
 	// 初始化+注册
 	public void initTools() {
 		hCNetSDK = HCNetSDK.INSTANCE;
 		boolean initSuc = hCNetSDK.NET_DVR_Init();
 		if (initSuc != true) {
-			System.out.println("初始化失败！错误码：" + getErrorCode());
+			System.err.println("初始化失败！");
+			printErrorInfo();
 		} else {
 			System.out.println("初始化成功");
 //			// 断线重连
@@ -146,7 +156,8 @@ public class HCTools {
 		if (ret) {
 			System.out.println("日志目录：" + logDir);
 		} else {
-			System.err.println("开启日志失败，错误码：" + getErrorCode());
+			System.err.println("开启日志失败");
+			printErrorInfo();
 		}
 	}
 
@@ -186,7 +197,8 @@ public class HCTools {
 		lUserID = hCNetSDK.NET_DVR_Login_V40(m_strLoginInfo, m_strDeviceInfo);
 		// -1: fail 0: success
 		if (lUserID == -1) {
-			System.err.println("注册失败，错误号:" + getErrorCode());
+			System.err.println("注册失败");
+			printErrorInfo();
 			return false;
 		} else {
 			System.out.println("注册成功");
@@ -211,7 +223,8 @@ public class HCTools {
 				struDoorCfg.size(), new IntByReference());
 
 		if (!bRet) {
-			System.err.println("获取门参数失败，错误码：" + getErrorCode());
+			System.err.println("获取门参数失败");
+			printErrorInfo();
 		}
 		struDoorCfg.read();
 		return struDoorCfg;
@@ -254,7 +267,8 @@ public class HCTools {
 			System.out.println("是否启用开门按钮：" + (struDoorCfg.byOpenButton > 0 ? "否" : "是"));
 			System.out.println("梯控访客延迟时间：" + struDoorCfg.byLadderControlDelayTime + "分钟");
 		} else {
-			System.err.println("获取门参数失败，错误码：" + getErrorCode());
+			System.err.println("获取门参数失败");
+			printErrorInfo();
 		}
 	}
 
@@ -267,7 +281,8 @@ public class HCTools {
 		if (bRet) {
 			System.out.println("修改成功");
 		} else {
-			System.err.println("修改参数失败，错误码：" + getErrorCode());
+			System.err.println("修改参数失败");
+			printErrorInfo();
 		}
 
 	}
@@ -299,6 +314,7 @@ public class HCTools {
 			System.out.println("执行成功！");
 		} else {
 			System.err.println("执行失败！");
+			printErrorInfo();
 		}
 		return result;
 	}
@@ -333,6 +349,7 @@ public class HCTools {
 			Pointer pUser = null;
 			if (!hCNetSDK.NET_DVR_SetDVRMessageCallBack_V31(fMSFCallBack_V31, pUser)) {
 				System.out.println("设置回调函数失败!");
+				printErrorInfo();
 				return;
 			}
 			// 设置报警布防参数，详见定义
@@ -345,7 +362,8 @@ public class HCTools {
 			// 报警布防
 			lAlarmHandle = hCNetSDK.NET_DVR_SetupAlarmChan_V41(lUserID, m_strAlarmInfo);
 			if (lAlarmHandle == -1) {
-				System.err.println(ipAddress + " 布防失败，错误号:" + getErrorCode());
+				System.err.println(ipAddress + " 布防失败");
+				printErrorInfo();
 			} else {
 				System.out.println(ipAddress + " 布防成功");
 			}
@@ -363,6 +381,7 @@ public class HCTools {
 				lAlarmHandle = -1;
 			} else {
 				System.err.println("撤防失败");
+				printErrorInfo();
 			}
 		}
 	}

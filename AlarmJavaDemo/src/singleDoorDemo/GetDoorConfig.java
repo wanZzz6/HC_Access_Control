@@ -44,7 +44,8 @@ public class GetDoorConfig {
 			System.out.println("是否启用开门按钮：" + (struDoorCfg.byOpenButton > 0 ? "否" : "是"));
 			System.out.println("梯控访客延迟时间：" + struDoorCfg.byLadderControlDelayTime + "分钟");
 		} else {
-			System.out.println("获取门参数失败，错误码：" + hcTool.getErrorCode());
+			System.out.println("获取门参数失败");
+			hcTool.printErrorInfo();
 		}
 		hcTool.cleanUp();
 	}
