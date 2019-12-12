@@ -9,6 +9,9 @@ public class SetDoorConfig {
 	public static void main(String[] args) {
 		HCTools hcTool = new HCTools("192.168.1.1", "admin", "admin777");
 		hcTool.initTools();
+		// 开启日志
+		hcTool.setLogDir(null); //null：默认日志路径
+		hcTool.enableLog();
 // ==================================================================================
 		// 先获取参数结构体，否则构造新的太麻烦
 		System.out.println("门原参数");

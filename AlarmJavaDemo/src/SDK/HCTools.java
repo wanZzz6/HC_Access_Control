@@ -13,6 +13,15 @@ public class HCTools {
 
 	private short port = 8000;
 
+//	日志的等级（默认为 0）：
+//	0-表示关闭日志，
+//	1-表示只输出 ERROR 错误日志，
+//	2-输出 ERROR 错误信息和 DEBUG 调试信息，
+//	3-输出 ERROR 错误信息、DEBUG 调试信息和 INFO 普通信息等所
+//	有信息
+	private int logLevel = 3;
+	private String logDir; // 日志文件夹， windows 默认值为"C:\\SdkLog\\"；linux 默认值"/home/sdklog/"
+
 	private String passwd;
 	private int lUserID = -1; // 用户句柄
 	private int lAlarmHandle = -1;// 报警布防句柄
@@ -80,9 +89,25 @@ public class HCTools {
 		return lUserID;
 	}
 
+	public int getLogLevel() {
+		return logLevel;
+	}
+
+	public void setLogLevel(int logLevel) {
+		this.logLevel = logLevel;
+	}
+
+	public String getLogDir() {
+		return logDir;
+	}
+
+	public void setLogDir(String logDir) {
+		this.logDir = logDir;
+	}
+
 	/*
-	 * SDK 的版本号和 build 信息。2 个高字节表示版本号 ：25~32 位表示主版本号，17~24 位表示次
-	 版本号；2 个低字节表示 build 信息。如 0x03000101：表示版本号为 3.0，build 号是 0101。
+	 * SDK 的版本号和 build 信息。2 个高字节表示版本号 ：25~32 位表示主版本号，17~24 位表示次 版本号；2 个低字节表示 build
+	 * 信息。如 0x03000101：表示版本号为 3.0，build 号是 0101。
 	 */
 	public String getSDKBuildVersion() {
 		String version = "0x" + Integer.toHexString(hCNetSDK.NET_DVR_GetSDKBuildVersion());
@@ -113,6 +138,16 @@ public class HCTools {
 		}
 
 		System.out.println("============= 华丽的分割线 ==============");
+	}
+
+	// 启用SDK日志功能
+	public void enableLog() {
+		boolean ret = hCNetSDK.NET_DVR_SetLogToFile(logLevel, logDir, true);
+		if (ret) {
+			System.out.println("日志目录：" + logDir);
+		} else {
+			System.err.println("开启日志失败，错误码：" + getErrorCode());
+		}
 	}
 
 	// 默认端口8000
@@ -172,8 +207,8 @@ public class HCTools {
 		// 获取指针
 		Pointer pDoorCfg = struDoorCfg.getPointer();
 		// 获取门参数：2108
-		boolean bRet = hCNetSDK.NET_DVR_GetDVRConfig(lUserID, HCNetSDK.NET_DVR_GET_DOOR_CFG, 1, pDoorCfg, struDoorCfg.size(),
-				new IntByReference());
+		boolean bRet = hCNetSDK.NET_DVR_GetDVRConfig(lUserID, HCNetSDK.NET_DVR_GET_DOOR_CFG, 1, pDoorCfg,
+				struDoorCfg.size(), new IntByReference());
 
 		if (!bRet) {
 			System.err.println("获取门参数失败，错误码：" + getErrorCode());
@@ -196,8 +231,8 @@ public class HCTools {
 		// 获取指针
 		Pointer pDoorCfg = struDoorCfg.getPointer();
 		// 获取门参数：2108
-		boolean bRet = hCNetSDK.NET_DVR_GetDVRConfig(lUserID, HCNetSDK.NET_DVR_GET_DOOR_CFG, 1, pDoorCfg, struDoorCfg.size(),
-				new IntByReference());
+		boolean bRet = hCNetSDK.NET_DVR_GetDVRConfig(lUserID, HCNetSDK.NET_DVR_GET_DOOR_CFG, 1, pDoorCfg,
+				struDoorCfg.size(), new IntByReference());
 
 		if (bRet) {
 			// 读数据
@@ -222,12 +257,12 @@ public class HCTools {
 			System.err.println("获取门参数失败，错误码：" + getErrorCode());
 		}
 	}
-	
+
 	// 设置门参数，NET_DVR_DOOR_CFG 参数设置完记得 write()
 	public void setDoorConfig(HCNetSDK.NET_DVR_DOOR_CFG m_struDoorCfg) {
 		boolean bRet = false;
-		bRet = hCNetSDK.NET_DVR_SetDVRConfig(lUserID, HCNetSDK.NET_DVR_SET_DOOR_CFG, 1,
-				m_struDoorCfg.getPointer(), m_struDoorCfg.size());
+		bRet = hCNetSDK.NET_DVR_SetDVRConfig(lUserID, HCNetSDK.NET_DVR_SET_DOOR_CFG, 1, m_struDoorCfg.getPointer(),
+				m_struDoorCfg.size());
 
 		if (bRet) {
 			System.out.println("修改成功");

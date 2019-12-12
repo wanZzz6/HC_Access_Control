@@ -12,6 +12,9 @@ public class GetDoorConfig {
 	public static void main(String[] args) {
 		HCTools hcTool = new HCTools("192.168.1.1", "admin", "admin777");
 		hcTool.initTools();
+		// 开启日志
+		hcTool.setLogDir(null); //null：默认日志路径
+		hcTool.enableLog();
 		// 门参数结构体
 		HCNetSDK.NET_DVR_DOOR_CFG struDoorCfg = new HCNetSDK.NET_DVR_DOOR_CFG();
 		// 获取指针

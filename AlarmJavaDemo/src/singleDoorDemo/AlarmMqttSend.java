@@ -21,6 +21,9 @@ public class AlarmMqttSend {
 		hctools.setfMSFCallBack_V31(cb);
 		// 初始化
 		hctools.initTools();
+		
+		hctools.setLogDir(null); //null：默认日志路径
+		hctools.enableLog();
 		// 布防
 		hctools.setupAlarmChan();
 		// 自定义等待过程，比如等待 10 s，中间进行一次远程开门
