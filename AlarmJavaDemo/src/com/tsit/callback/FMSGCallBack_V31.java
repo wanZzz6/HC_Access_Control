@@ -7,7 +7,6 @@ import com.tsit.mqtt.MyMqttClient;
 
 import sdk.HCNetSDK;
 
-
 //文档6.5.1
 public class FMSGCallBack_V31 implements HCNetSDK.FMSGCallBack_V31 {
 
@@ -120,7 +119,9 @@ public class FMSGCallBack_V31 implements HCNetSDK.FMSGCallBack_V31 {
 					+ "，上传通道：" + ReportChannel + "，防区类型：" + byType;
 			System.out.println(sAlarmType);
 			// 发送mqtt消息， QoS=0
-			sendMqtt(mqttvalue);
+			if (tbDeviceName != "" || doorName != "") {
+				sendMqtt(mqttvalue);
+			}
 
 			break;
 		// 门禁身份证刷卡信息
@@ -152,7 +153,9 @@ public class FMSGCallBack_V31 implements HCNetSDK.FMSGCallBack_V31 {
 
 			System.out.println(sAlarmType);
 
-			sendMqtt(mqttvalue);
+			if (tbDeviceName != "" || doorName != "") {
+				sendMqtt(mqttvalue);
+			}
 			break;
 
 		case HCNetSDK.COMM_PASSNUM_INFO_ALARM:
