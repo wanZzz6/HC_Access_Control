@@ -319,9 +319,6 @@ public class AlarmJavaDemoView extends FrameView {
                     catch (UnsupportedEncodingException e1) {
                         // TODO Auto-generated catch block
                         e1.printStackTrace();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
                     }
                     
                     newRow[0] = dateFormat.format(today);
@@ -368,11 +365,7 @@ public class AlarmJavaDemoView extends FrameView {
                         sAlarmType = sAlarmType + ",车辆类型："+strItsPlateResult.byVehicleType + ",交通抓拍上传，车牌："+ srt3;
                     }
                     catch (UnsupportedEncodingException e1) {
-                        // TODO Auto-generated catch block
                         e1.printStackTrace();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
                     }
                     
                     newRow[0] = dateFormat.format(today);
@@ -469,9 +462,6 @@ public class AlarmJavaDemoView extends FrameView {
                     catch (UnsupportedEncodingException e1) {
                         // TODO Auto-generated catch block
                         e1.printStackTrace();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
                     }
                     
                     newRow[0] = dateFormat.format(today);
@@ -526,9 +516,6 @@ public class AlarmJavaDemoView extends FrameView {
                     catch (UnsupportedEncodingException e1) {
                         // TODO Auto-generated catch block
                         e1.printStackTrace();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
                     }
                     
                     newRow[0] = dateFormat.format(today);

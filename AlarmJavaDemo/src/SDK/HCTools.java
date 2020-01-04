@@ -30,8 +30,6 @@ public class HCTools {
 	private FMSGCallBack fMSFCallBack = null;// 报警回调函数实现
 	private FMSGCallBack_V31 fMSFCallBack_V31 = null;// 报警回调函数实现
 
-	public HCNetSDK.NET_DVR_DOOR_CFG struDoorCfg; // 门参数结构体
-
 	public void setfMSFCallBack(FMSGCallBack fMSFCallBack) {
 		this.fMSFCallBack = fMSFCallBack;
 	}
@@ -105,15 +103,6 @@ public class HCTools {
 		this.logDir = logDir;
 	}
 
-	/*
-	 * SDK 的版本号和 build 信息。2 个高字节表示版本号 ：25~32 位表示主版本号，17~24 位表示次 版本号；2 个低字节表示 build
-	 * 信息。如 0x03000101：表示版本号为 3.0，build 号是 0101。
-	 */
-	public String getSDKBuildVersion() {
-		String version = "0x" + Integer.toHexString(hCNetSDK.NET_DVR_GetSDKBuildVersion());
-		return version;
-	}
-
 	// 获取错误码
 	public int getErrorCode() {
 		if (hCNetSDK == null) {
@@ -127,7 +116,7 @@ public class HCTools {
 	public String getErrorMsg() {
 		return hCNetSDK.NET_DVR_GetErrorMsg(new IntByReference(getErrorCode()));
 	}
-	
+
 	public void printErrorInfo() {
 		System.err.println("错误码：" + getErrorCode() + "，错误信息：" + getErrorMsg());
 	}
@@ -141,24 +130,12 @@ public class HCTools {
 			printErrorInfo();
 		} else {
 			System.out.println("初始化成功");
-//			// 断线重连
+//			//设置连接超时时间与重连功能
 //			hCNetSDK.NET_DVR_SetConnectTime(2000, 1);
 //			hCNetSDK.NET_DVR_SetReconnect(10000, true);
 			userLogin(this.ipAddress, this.userName, this.passwd, this.port);
 		}
-
-		System.out.println("============= 华丽的分割线 ==============");
-	}
-
-	// 启用SDK日志功能
-	public void enableLog() {
-		boolean ret = hCNetSDK.NET_DVR_SetLogToFile(logLevel, logDir, true);
-		if (ret) {
-			System.out.println("日志目录：" + logDir);
-		} else {
-			System.err.println("开启日志失败");
-			printErrorInfo();
-		}
+		System.out.println("============= 华丽的分割线 ====  ==========");
 	}
 
 	// 默认端口8000
@@ -206,15 +183,12 @@ public class HCTools {
 		}
 	}
 
-	// 获取门参数
+	// 请求并返回门参数结构体
 	public HCNetSDK.NET_DVR_DOOR_CFG getDoorConfig() {
 		if (lUserID == -1) {
 			System.err.println("请先注册");
 		}
-		if (this.struDoorCfg == null) {
-			this.struDoorCfg = new HCNetSDK.NET_DVR_DOOR_CFG();
-		}
-
+		HCNetSDK.NET_DVR_DOOR_CFG struDoorCfg = new HCNetSDK.NET_DVR_DOOR_CFG();
 		struDoorCfg.write();
 		// 获取指针
 		Pointer pDoorCfg = struDoorCfg.getPointer();
@@ -225,51 +199,39 @@ public class HCTools {
 		if (!bRet) {
 			System.err.println("获取门参数失败");
 			printErrorInfo();
+			return null;
 		}
+		// 读数据
 		struDoorCfg.read();
 		return struDoorCfg;
 	}
 
-	// 输出门参数
-	public void printDoorConfig() {
+		// 输出门参数结构体的内容，如果传入null，先获取当前门参数信息
+	public void printDoorConfig(HCNetSDK.NET_DVR_DOOR_CFG doorCfg) {
 		if (lUserID == -1) {
 			System.err.println("请先注册");
 			return;
 		}
-		if (struDoorCfg == null) {
-			struDoorCfg = new HCNetSDK.NET_DVR_DOOR_CFG();
+		if (doorCfg == null) {
+			doorCfg = getDoorConfig();
 		}
 
-		struDoorCfg.write();
-		// 获取指针
-		Pointer pDoorCfg = struDoorCfg.getPointer();
-		// 获取门参数：2108
-		boolean bRet = hCNetSDK.NET_DVR_GetDVRConfig(lUserID, HCNetSDK.NET_DVR_GET_DOOR_CFG, 1, pDoorCfg,
-				struDoorCfg.size(), new IntByReference());
-
-		if (bRet) {
-			// 读数据
-			struDoorCfg.read();
-			System.out.println("获取门参数：");
-			System.out.println("门名称:" + new String(struDoorCfg.byDoorName));
-			System.out.print("门磁类型： " + (struDoorCfg.byMagneticType > 0 ? "常开" : "常闭"));
-			System.out.println("开门按钮类型：" + (struDoorCfg.byOpenButtonType > 0 ? "常开" : "常闭"));
-			System.out.println("开门持续时间： " + struDoorCfg.byOpenDuration);
-			System.out.println("是否启用闭门回锁： " + (struDoorCfg.byEnableDoorLock > 0 ? "是" : "否"));
-			System.out.println("是否启用首卡常开功能： " + (struDoorCfg.byEnableLeaderCard > 0 ? "是" : "否"));
-			System.out
-					.println("首卡模式：" + (new String[] { "不启用首卡功能", "首卡常开模式", "首卡授权模式" })[struDoorCfg.byLeaderCardMode]);
-			System.out.println("胁迫密码：" + new String(struDoorCfg.byStressPassword));
-			System.out.println("超级密码：" + new String(struDoorCfg.bySuperPassword));
-			System.out.println("解锁密码：" + new String(struDoorCfg.bySuperPassword));
-			System.out.println("是否启用门锁输入检测：" + (struDoorCfg.byLockInputCheck > 0 ? "启用" : "不启用"));
-			System.out.println("门锁输入类型：" + (struDoorCfg.byLockInputType > 0 ? "常开" : "常闭"));
-			System.out.println("是否启用开门按钮：" + (struDoorCfg.byOpenButton > 0 ? "否" : "是"));
-			System.out.println("梯控访客延迟时间：" + struDoorCfg.byLadderControlDelayTime + "分钟");
-		} else {
-			System.err.println("获取门参数失败");
-			printErrorInfo();
-		}
+		System.out.println("获取门参数：");
+		System.out.println("门名称:" + new String(doorCfg.byDoorName));
+		System.out.print("门磁类型： " + (doorCfg.byMagneticType > 0 ? "常开" : "常闭"));
+		System.out.println("开门按钮类型：" + (doorCfg.byOpenButtonType > 0 ? "常开" : "常闭"));
+		System.out.println("开门持续时间： " + doorCfg.byOpenDuration);
+		System.out.println("是否启用闭门回锁： " + (doorCfg.byEnableDoorLock > 0 ? "是" : "否"));
+		System.out.println("是否启用首卡常开功能： " + (doorCfg.byEnableLeaderCard > 0 ? "是" : "否"));
+		System.out
+				.println("首卡模式：" + (new String[] { "不启用首卡功能", "首卡常开模式", "首卡授权模式" })[doorCfg.byLeaderCardMode]);
+		System.out.println("胁迫密码：" + new String(doorCfg.byStressPassword));
+		System.out.println("超级密码：" + new String(doorCfg.bySuperPassword));
+		System.out.println("解锁密码：" + new String(doorCfg.bySuperPassword));
+		System.out.println("是否启用门锁输入检测：" + (doorCfg.byLockInputCheck > 0 ? "启用" : "不启用"));
+		System.out.println("门锁输入类型：" + (doorCfg.byLockInputType > 0 ? "常开" : "常闭"));
+		System.out.println("是否启用开门按钮：" + (doorCfg.byOpenButton > 0 ? "否" : "是"));
+		System.out.println("梯控访客延迟时间：" + doorCfg.byLadderControlDelayTime + "分钟");
 	}
 
 	// 设置门参数，NET_DVR_DOOR_CFG 参数设置完记得 write()
@@ -386,8 +348,29 @@ public class HCTools {
 		}
 	}
 
+	// 启用SDK日志功能
+	// SDK 限制个数默认为 10 个，可以调用接口 NET_DVR_SetSDKLocalCfg
+	public void enableLog() {
+		boolean ret = hCNetSDK.NET_DVR_SetLogToFile(logLevel, logDir, true);
+		if (ret) {
+			System.out.println("日志目录：" + (logDir == null ? "默认" : logDir));
+		} else {
+			System.err.println("开启日志失败");
+			printErrorInfo();
+		}
+	}
+
+	/*
+	 * SDK 的版本号和 build 信息。2 个高字节表示版本号 ：25~32 位表示主版本号，17~24 位表示次 版本号；2 个低字节表示 build
+	 * 信息。如 0x03000101：表示版本号为 3.0，build 号是 0101。
+	 */
+	public String getSDKBuildVersion() {
+		String version = "0x" + Integer.toHexString(hCNetSDK.NET_DVR_GetSDKBuildVersion());
+		return version;
+	}
+
 	// 注销
-	public void LouOut() {
+	private void LouOut() {
 		if (lUserID > -1) {
 			// 注销
 			hCNetSDK.NET_DVR_Logout(lUserID);

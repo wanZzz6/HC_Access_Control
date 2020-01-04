@@ -2,3 +2,7 @@
 AlarmJavaDemo/build/
 
 AlarmJavaDemo/src/Test.java
+
+AlarmJavaDemo/src/config.json
+
+AlarmJavaDemo/src/singleDoorDemo/Test.java

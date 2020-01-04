@@ -11,9 +11,9 @@ import sdk.HCNetSDK;
 public class FMSGCallBack_V31 implements HCNetSDK.FMSGCallBack_V31 {
 
 	// 门别名
-	public String doorName = "";
+	private String doorName = "";
 	// 对应的thingsboard物联网平台设备名
-	public String tbDeviceName = "";
+	private String tbDeviceName = "";
 
 	private static final String GATEWAY_TELEMETRY_TOPIC = "v1/gateway/telemetry";
 	// DCL单例模式
@@ -38,11 +38,13 @@ public class FMSGCallBack_V31 implements HCNetSDK.FMSGCallBack_V31 {
 	public FMSGCallBack_V31() {
 	}
 
+	//一门一设备
 	public FMSGCallBack_V31(String doorName) {
 		this.doorName = doorName;
 	}
-
+	//一设备多门
 	public FMSGCallBack_V31(String doorName, String tbDeviceName) {
+		//上传到thingsboard需要设置名称
 		this.doorName = doorName;
 		this.tbDeviceName = tbDeviceName;
 	}
